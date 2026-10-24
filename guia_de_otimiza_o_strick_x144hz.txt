@@ -1,0 +1,183 @@
+================================================================================
+GUIA COMPLETO E DEFINITIVO DE OTIMIZAÇÃO: STRICK X144Hz & ULTRA PERFORMANCE ENGINE
+================================================================================
+
+Assunto: Guia Completo e Definitivo de Otimização para Emuladores e FPS
+Versão: 2.0 (STRICK X144Hz Engine)
+
+--------------------------------------------------------------------------------
+FALA, RAPAZIADA! SALVE, FAMÍLIA!
+--------------------------------------------------------------------------------
+
+Espero que todo mundo esteja rodando os jogos liso e no máximo de FPS possível! 
+
+Se você joga Free Fire, PUBG Mobile, Call of Duty Mobile ou qualquer outro jogo 
+competitivo através de emuladores no PC — como BlueStacks, LDPlayer, GameLoop ou 
+MSI App Player —, com certeza já passou pela dor de cabeça de ver o jogo dar 
+aquela travada chata (stuttering), queda brusca de FPS no meio do rush, lag de 
+entrada (input delay) ou tiro que simplesmente não contabiliza na bala (hitreg ruim).
+
+Sabemos perfeitamente que o sistema operacional Windows padrão não foi projetado 
+exclusivamente para rodar emuladores Android pesados em alta taxa de atualização. 
+Por padrão, o Windows tenta economizar energia, distribui recursos do processador 
+para programas em segundo plano e coloca núcleos da CPU em "modo de espera" 
+(Core Parking). O resultado? Telas engasgando, sensibilidade pesada e muita 
+raiva na hora da partida ranqueada.
+
+Pensando nisso, desenvolvemos e organizamos o nosso ecossistema completo de 
+otimização: o STRICK X144Hz - Emulator & CPU Ultra Boost Engine junto com 
+modificações avançadas de registro do Windows (.reg). Neste documento, vou 
+explicar detalhadamente cada uma das etapas, como cada script funciona internamente 
+no seu computador e como você pode extrair até o último hertz do seu monitor e 
+o máximo de desempenho do seu hardware.
+
+--------------------------------------------------------------------------------
+1. ELEVAÇÃO DE PRIORIDADE DO PROCESSO E FIXAÇÃO DE THREADS (CPU PRIORITY)
+--------------------------------------------------------------------------------
+
+O primeiro grande gargalo ao rodar emuladores no Windows é a prioridade que o 
+sistema atribui ao processo do jogo em comparação com tarefas do sistema 
+operativo ou aplicativos como Discord, Google Chrome e drivers em segundo plano.
+
+Como o Script Funciona:
+O nosso script em PowerShell (optimizer.ps1) executa de forma totalmente discreta 
+e oculta no sistema (utilizando o parâmetro -WindowStyle Hidden). Ele faz uma 
+varredura contínua e identifica os principais executáveis de emuladores Android 
+do mercado:
+
+  * BlueStacks 5 & 4: HD-Player.exe e Bluestacks.exe
+  * LDPlayer VM: LdVBoxHeadless.exe
+  * Tencent GameLoop / PUBG Mobile: aow_exe.exe
+  * MSI App Player: AppPlayer.exe
+  * SmartGaGa & Outros Emuladores Genéricos: SmartGaGa.exe e AndroidProcess.exe
+
+Assim que o executável do emulador é detectado, o otimizador força a alteração 
+da classe de prioridade do processo diretamente para "High" (Alta) no agendador 
+de tarefas do Windows.
+
+Qual é o Benefício Prático?
+Ao definir a prioridade como Alta, o processador (CPU) prioriza a renderização 
+de quadros e o processamento de comandos do emulador em relação a qualquer outro 
+programa aberto no computador. Isso elimina o input lag, deixa a resposta da 
+sensibilidade do mouse muito mais direta e instantânea, e reduz drasticamente 
+a perda de quadros durante trocas de tiros intensas.
+
+--------------------------------------------------------------------------------
+2. DESATIVAÇÃO DO CORE PARKING E ESTADO DE DESEMPENHO MÁXIMO DA CPU
+--------------------------------------------------------------------------------
+
+Por padrão, a gestão de energia do Windows aplica o chamado Core Parking 
+(Estacionamento de Núcleos). Essa funcionalidade desliga temporariamente núcleos 
+lógicos do processador quando o computador não está sob carga máxima para economizar 
+energia elétrica. No entanto, quando um jogo exige poder bruto repentinamente, 
+o tempo que o núcleo leva para "acordar" gera micro-travamentos (micro-stutters) 
+perceptíveis na tela.
+
+A Solução do Nosso Script:
+Utilizando o utilitário nativo de configuração de energia do Windows (powercfg), 
+o otimizador injeta comandos no plano de energia ativo para proibir o 
+estacionamento de núcleos:
+
+  powercfg -setacvalueindex scheme_current sub_processor 00000000-0000-0000-0000-000000000000 100
+  powercfg -setactive scheme_current
+
+Qual é o Benefício Prático?
+Todos os núcleos e threads do seu processador permanecem 100% ativos e operando 
+em frequência máxima contínua. Sem quedas bruscas de clock (downclocking) ou 
+respostas lentas do processador. O framerate do seu jogo se mantém estável mesmo 
+em cenários complexos do mapa.
+
+--------------------------------------------------------------------------------
+3. LIMPEZA AGRESSIVA DE MEMÓRIA RAM E PURGA DA MEMÓRIA STANDBY
+--------------------------------------------------------------------------------
+
+Conforme você joga e utiliza o computador, o Windows vai armazenando arquivos 
+temporários na memória RAM na forma de Standby List (Lista de Espera). Embora o 
+objetivo seja agilizar a abertura de arquivos, na prática com emuladores, essa 
+lista reduz a quantidade de memória RAM física limpa e disponível para o buffer 
+de texturas do jogo.
+
+A Solução do Nosso Script:
+O script engaja diretamente o coletor de lixo do ecossistema .NET do sistema 
+operacional:
+
+  [System.GC]::Collect()
+  [System.GC]::WaitForPendingFinalizers()
+
+Qual é o Benefício Prático?
+Essa instrução força a liberação imediata de blocos de memória mantidos por 
+processos encerrados e limpa arquivos não alocados, garantindo que o seu emulador 
+tenha acesso direto a memória RAM física limpa. Isso previne o congelamento de 
+tela (freezing) após várias horas seguidas de jogatina.
+
+--------------------------------------------------------------------------------
+4. LIMPEZA DE CACHE DE REDE E ESTABILIZAÇÃO DE HITREG (PACKET FLUSH)
+--------------------------------------------------------------------------------
+
+Em jogos de tiro competitivos, milissegundos fazem toda a diferença entre acertar 
+o capa ou ser derrubado. Muitas vezes, dados acumulados no cache DNS local provocam 
+variações de rota até os servidores do jogo, ocasionando o famoso "tiro fantasma" 
+(onde você atira, faz o som, mas o dano não entra no adversário).
+
+A Solução do Nosso Script:
+O otimizador limpa a tabela de resolução de nomes DNS do Windows silenciosamente:
+
+  ipconfig /flushdns
+
+Qual é o Benefício Prático?
+O sistema é forçado a reestabelecer conexões limpas e diretas com os servidores 
+de jogo, minimizando a perda de pacotes (packet loss) e proporcionando um hitreg 
+muito mais preciso e consistente.
+
+--------------------------------------------------------------------------------
+5. OTIMIZAÇÃO DE REGISTRO DO WINDOWS (fps optimization.reg)
+--------------------------------------------------------------------------------
+
+Além do script em PowerShell, aplicamos uma otimização no Registro do Windows 
+que modifica a forma como o subsistema multimídia gerencia a divisão de tempo 
+do processador:
+
+  [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile]
+  "SystemResponsiveness"=dword:00000001
+
+O que essa chave faz?
+Por padrão, o Windows reserva cerca de 20% dos recursos do processador para 
+tarefas em segundo plano do sistema operacional, deixando apenas 80% para 
+aplicações de jogos. Ao alterar a chave SystemResponsiveness para o valor 1, 
+reduzimos essa reserva para apenas 1%, dedicando 99% de toda a capacidade de 
+processamento do computador diretamente para o jogo e áudio em tempo real!
+
+--------------------------------------------------------------------------------
+PASSO A PASSO COMPLETO PARA INSTALAÇÃO E USO
+--------------------------------------------------------------------------------
+
+1. Aplique as Alterações de Registro:
+   * Clique com o botão direito no arquivo "fps optimization.reg" e selecione Mesclar.
+   * Confirme a alteração quando o Windows perguntar.
+
+2. Execute o Otimizador de CPU:
+   * Abra o PowerShell como Administrador.
+   * Execute o script "optimizer.ps1".
+   * O script será executado de forma oculta no sistema sem atrapalhar sua área de trabalho.
+
+3. Verificação de Sucesso:
+   * Abra o seu emulador (por exemplo, BlueStacks 5).
+   * Pressione Ctrl + Shift + Esc para abrir o Gerenciador de Tarefas.
+   * Vá até a aba Detalhes, localize "HD-Player.exe" (ou o executável do seu emulador).
+   * Clique com o botão direito -> Definir prioridade -> Verifique se está marcado como Alta.
+
+--------------------------------------------------------------------------------
+CONCLUSÃO
+--------------------------------------------------------------------------------
+
+Com esse conjunto de modificações, o seu computador fica totalmente calibrado 
+para entregar a menor latência possível e a máxima taxa de quadros que a sua 
+placa de vídeo e processador podem oferecer. Chega de queda de FPS no meio da 
+trocação, chega de travamentos e bora amassar nas partidas!
+
+Tamo junto demais, monstro! Se precisar de qualquer suporte extra ou ajustes 
+para a sua configuração específica, conta com a gente!
+
+Atenciosamente,
+Equipe de Otimização & Performance STRICK
+================================================================================
